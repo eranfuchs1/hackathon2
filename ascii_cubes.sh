@@ -4,4 +4,4 @@ if [ -z "$1" ]; then
 	exit 1
 fi
 
-blender --background --python untitled.py $1
+blender --background --python untitled.py $1 --app-template "$(pwd)/startup.blend"

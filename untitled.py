@@ -1,4 +1,24 @@
 import curses
+import sys
+import copy
+import os.path
+
+def all_to_data3d(data3d, alldata3d, cursor3d):
+    answer = copy.deepcopy(data3d)
+    for key in alldata3d:
+        z, y, x = key.split(' ')
+        z = int(z) - cursor3d[0] + (len(answer) // 2) + 1
+        y = int(y) - cursor3d[1] + (len(answer) // 2) + 1
+        x = int(x) - cursor3d[2] + (len(answer) // 2) + 1
+        if z < 0 or z > len(answer) - 1:
+            continue
+        elif y < 0 or y > len(answer[0]) - 1:
+            continue
+        elif x < 0 or x > len(answer[0][0]) - 1:
+            continue
+        else:
+            answer[z][y][x] = alldata3d[key]
+    return answer
 
 
 def view_top(data3d, height, width):
@@ -74,7 +94,7 @@ def move3d(cursor3d, y, x, i, j):
     elif view_name == 'right':
         cursor3d[1] += y
         cursor3d[0] -= x
-    cursor3d = check_limits_any(cursor3d, width)
+    #cursor3d = check_limits_any(cursor3d, width)
     return cursor3d
 
 def cursor2d(cursor3d, i, j):
@@ -106,7 +126,11 @@ height = lines // 2
 width = min([height, width])
 height = min([height, width])
 
-data3d = [[[' ' for x in range(width - 1)] for y in range(height - 1)] for z in range(height - 1)]
+data3d_blank = [[[' ' for x in range(width - 1)] for y in range(height - 1)] for z in range(height - 1)]
+alldata3d = {}
+if os.path.isfile(f'{sys.argv[4]}.ascii3d'):
+    with open(f'{sys.argv[4]}.ascii3d', 'r') as f:
+        alldata3d = eval(f.read())
 
 
 
@@ -174,7 +198,11 @@ while ch != 'q':
     elif ch == 'l':
         j += 1
     elif len(ch) == 1:
-        data3d[cursor3d[0]][cursor3d[1]][cursor3d[2]] = ch
+        alldata3d['{} {} {}'.format(*cursor3d)] = ch
+        #data3d[cursor3d[0]][cursor3d[1]][cursor3d[2]] = ch
+    i, j = check_limits(i, j, 2, 2)
+    cursor3d = move3d(cursor3d, y, x, i, j)
+    data3d = all_to_data3d(data3d_blank, alldata3d, cursor3d)
     for I in range(len(wins)):
         for J in range(len(wins[I])):
             wins[I][J].clear()
@@ -182,11 +210,11 @@ while ch != 'q':
                 for X, cell in enumerate(row):
                     wins[I][J].addch(Y, X, cell)
             wins[I][J].refresh()
-    i, j = check_limits(i, j, 2, 2)
     win = wins[i][j]
-    y2, x2 = check_limits(ys[i][j], xs[i][j], height - 1, width - 1)
-    cursor3d = move3d(cursor3d, y, x, i, j)
-    c2d = cursor2d(cursor3d, i, j)
+    #y2, x2 = check_limits(ys[i][j], xs[i][j], height - 1, width - 1)
+    c2d = [width//2, width//2]
+    if views[f'{i} {j}'] == 'right':
+        c2d[1] -= 2
     win.move(c2d[0], c2d[1])
     ch = win.getkey()
 
@@ -200,21 +228,25 @@ curses.echo()
 curses.endwin()
 
 import bpy
-import sys
 import os
 
-def render_ascii_cubes(data3d):
-    for z, slc in enumerate(data3d):
-        for y, row in enumerate(slc):
-            for x, cell in enumerate(row):
-                if cell != ' ':
-                    bpy.ops.mesh.primitive_cube_add()
-                    cube = bpy.context.selected_objects[0]
-                    cube.location = (float(x) * 2, float(y) * 2, float(z) * 2)
+def render_ascii_cubes(alldata3d):
+    for key in alldata3d:
+        z, y, x = key.split(' ')
+        z = int(z)
+        y = int(y)
+        x = int(x)
+        cell = alldata3d[key]
+        if cell != ' ':
+            bpy.ops.mesh.primitive_cube_add()
+            cube = bpy.context.selected_objects[0]
+            cube.location = (float(x) * 2, float(y) * 2, float(z) * 2)
 
 
 def write_to_file(fname):
     bpy.ops.wm.save_as_mainfile(filepath=str('./{}.blend'.format(fname)))
 
-render_ascii_cubes(data3d)
+render_ascii_cubes(alldata3d)
 write_to_file(sys.argv[4])
+with open(f'{sys.argv[4]}.ascii3d', 'w') as f:
+    f.write(str(alldata3d))

@@ -2,3 +2,4 @@ hackathon_venv
 *.blend
 *.blender
 *.blend*
+*.ascii3d
