@@ -198,8 +198,23 @@ curses.nocbreak()
 stdscr.keypad(False)
 curses.echo()
 curses.endwin()
-import blender_script
-import sys
 
-blender_script.render_ascii_cubes(data3d)
-blender_script.write_to_file(sys.argv[4])
+import bpy
+import sys
+import os
+
+def render_ascii_cubes(data3d):
+    for z, slc in enumerate(data3d):
+        for y, row in enumerate(slc):
+            for x, cell in enumerate(row):
+                if cell != ' ':
+                    bpy.ops.mesh.primitive_cube_add()
+                    cube = bpy.context.selected_objects[0]
+                    cube.location = (float(x) * 2, float(y) * 2, float(z) * 2)
+
+
+def write_to_file(fname):
+    bpy.ops.wm.save_as_mainfile(filepath=str('./{}.blend'.format(fname)))
+
+render_ascii_cubes(data3d)
+write_to_file(sys.argv[4])
