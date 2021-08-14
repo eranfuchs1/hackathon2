@@ -76,6 +76,22 @@ def view_right(data3d, height, width):
                     view[y][(len(data3d) - 1) - z] = data3d[z][y][x]
     return view
 
+def frame_and_title(view, title):
+    for y in [0, len(view) - 1]:
+        for x in range(len(view[0])):
+            view[y][x] = '-'
+            if x == 0 or x == len(view[0]) -1:
+                view[y][x] = '+'
+    for x in [0, len(view[0]) - 1]:
+        for y in range(len(view)):
+            view[y][x] = '|'
+            if y == 0 or y == len(view) -1:
+                view[y][x] = '+'
+    for index, c in enumerate(title):
+        view[0][index + 1] = c
+    return view
+
+
 views = {}
 views['0 0'] = 'top'
 views['0 1'] = 'front'
@@ -229,7 +245,7 @@ while ch != 'q':
     for I in range(len(wins)):
         for J in range(len(wins[I])):
             wins[I][J].clear()
-            for Y, row in enumerate(functions[f'{I} {J}'](data3d, height - 1, width - 1)):
+            for Y, row in enumerate(frame_and_title(functions[f'{I} {J}'](data3d, height - 1, width - 1), views[f'{I} {J}'])):
                 for X, cell in enumerate(row):
                     wins[I][J].addch(Y, X, cell)
             wins[I][J].refresh()
