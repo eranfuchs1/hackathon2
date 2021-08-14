@@ -24,7 +24,7 @@ def all_to_data3d(data3d, alldata3d, cursor3d):
 
 def view_top(data3d, height, width):
     view = [[' ' for x in range(width)] for y in range(height)]
-    for y in range(len(data3d[0])-1,0,-1):
+    for y in range(len(data3d[0])):
         for z in range(len(data3d)):
             for x in range(len(data3d[0][0])):
                 if view[z][x] == ' ':
