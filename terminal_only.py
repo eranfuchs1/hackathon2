@@ -129,9 +129,10 @@ height = min([height, width])
 
 data3d_blank = [[[' ' for x in range(width - 1)] for y in range(height - 1)] for z in range(height - 1)]
 alldata3d = {}
-if os.path.isfile(f'{sys.argv[1]}.ascii3d'):
-    with open(f'{sys.argv[1]}.ascii3d', 'r') as f:
-        alldata3d = eval(f.read())
+if len(sys.argv) > 1:
+    if os.path.isfile(f'{sys.argv[1]}.ascii3d'):
+        with open(f'{sys.argv[1]}.ascii3d', 'r') as f:
+            alldata3d = eval(f.read())
 
 
 
