@@ -229,4 +229,5 @@ stdscr.keypad(False)
 curses.echo()
 curses.endwin()
 
-print(str(alldata3d))
+with open(f'{sys.argv[1]}.ascii3d', 'w') as f:
+    f.write(str(alldata3d))
